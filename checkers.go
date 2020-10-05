@@ -43,9 +43,11 @@ func ValidTimestamp(leeway time.Duration) Checker {
 
 // AcceptableCertificate checks that the certificate used to sign the assertion is valid for a given
 // issuer. The pool is used as a root of trust.
-func AcceptableCertificate(jar func(issuer string) *x509.CertPool) Checker {
+func AcceptableCertificate(jar interface {
+	Find(issuer string) *x509.CertPool
+}) Checker {
 	return func(p Principal) error {
-		pool := jar(p.Issuer)
+		pool := jar.Find(p.Issuer)
 		if pool == nil {
 			return fmt.Errorf("unknown issuer")
 		}
@@ -61,6 +63,10 @@ func AcceptableCertificate(jar func(issuer string) *x509.CertPool) Checker {
 		return nil
 	}
 }
+
+type JarFunc func(string) *x509.CertPool
+
+func (jf JarFunc) Find(issuer string) *x509.CertPool { return jf(issuer) }
 
 var acceptTime time.Time // can be set to accept older certificates. Reset to zero after use (in test only)
 

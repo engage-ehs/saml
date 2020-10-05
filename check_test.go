@@ -30,7 +30,7 @@ func TestReadSAMLSignature(t *testing.T) {
 
 		cp := bytes.NewReader(dbuf[:sz])
 		p, err := Check(cp,
-			AcceptableCertificate(myjar),
+			AcceptableCertificate(JarFunc(myjar)),
 		)
 		if err != nil {
 			t.Fatal(m, err)
